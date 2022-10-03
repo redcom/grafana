@@ -79,11 +79,11 @@ func (gs *SessionDB) ExecWithReturningId(ctx context.Context, query string, args
 	return execWithReturningId(ctx, gs.driverName(), query, gs, args...)
 }
 
-func (ss *SessionDB) SqlxInTransactionWithRetry(ctx context.Context, fn func(ctx context.Context) error, retry int) error {
-	return sqlxInTransactionWithRetryCtx(ctx, ss, ss.bus, func(tx *SessionTx) error {
+func (gs *SessionDB) SqlxInTransactionWithRetry(ctx context.Context, fn func(ctx context.Context) error, retry int) error {
+	return sqlxInTransactionWithRetryCtx(ctx, gs, gs.bus, func(tx *SessionTx) error {
 		withValue := context.WithValue(ctx, ContextSQLxTransactionKey{}, tx)
 		return fn(withValue)
-	}, retry, ss.logger)
+	}, retry, gs.logger)
 }
 
 func sqlxInTransactionWithRetryCtx(ctx context.Context, sess *SessionDB, bus bus.Bus, callback SQLxDBTransactionFunc, retry int, logger log.Logger) error {
