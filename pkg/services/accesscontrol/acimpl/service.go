@@ -27,7 +27,7 @@ func ProvideService(cfg *setting.Cfg, store sqlstore.Store, routeRegister routin
 	service := ProvideOSSService(cfg, database.ProvideService(store), cache)
 
 	if !accesscontrol.IsDisabled(cfg) {
-		api.NewAccessControlAPI(routeRegister, accessControl, service).RegisterAPIEndpoints()
+		api.NewAccessControlAPI(routeRegister, accessControl, service, store).RegisterAPIEndpoints()
 		if err := accesscontrol.DeclareFixedRoles(service); err != nil {
 			return nil, err
 		}
