@@ -72,6 +72,14 @@ type SessionTx struct {
 	sqlxtx *sqlx.Tx
 }
 
+func (gtx *SessionTx) Commit() error {
+	return gtx.sqlxtx.Commit()
+}
+
+func (gtx *SessionTx) Rollback() error {
+	return gtx.sqlxtx.Rollback()
+}
+
 func (gtx *SessionTx) NamedExec(ctx context.Context, query string, arg interface{}) (sql.Result, error) {
 	return gtx.sqlxtx.NamedExecContext(ctx, gtx.sqlxtx.Rebind(query), arg)
 }
