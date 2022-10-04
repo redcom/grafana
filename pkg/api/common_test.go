@@ -391,10 +391,10 @@ func setupHTTPServerWithCfgDb(
 		userSvc = &usertest.FakeUserService{}
 	} else {
 		var err error
-		acService, err = acimpl.ProvideService(cfg, db, routeRegister, localcache.ProvideService())
-		require.NoError(t, err)
 		ac = acimpl.ProvideAccessControl(cfg)
 		userSvc = userimpl.ProvideService(db, nil, cfg, db)
+		acService, err = acimpl.ProvideService(cfg, db, routeRegister, localcache.ProvideService(), ac)
+		require.NoError(t, err)
 	}
 	teamPermissionService, err := ossaccesscontrol.ProvideTeamPermissions(cfg, routeRegister, db, ac, license, acService, teamService, userSvc)
 	require.NoError(t, err)
