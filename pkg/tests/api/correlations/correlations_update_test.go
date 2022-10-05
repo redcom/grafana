@@ -334,7 +334,7 @@ func TestIntegrationUpdateCorrelation(t *testing.T) {
 				"label": "1",
 				"description": "1",
 				"config": {
-					"field": "fieldName",
+					"field": "field",
 					"target": { "expr": "bar" }
 				}
 			}`,
@@ -350,7 +350,9 @@ func TestIntegrationUpdateCorrelation(t *testing.T) {
 
 		require.Equal(t, "Correlation updated", response.Message)
 		require.Equal(t, "1", response.Result.Label)
-		require.Equal(t, "1", response.Result.Label) //TODO: Why is it in here twice?
+		require.Equal(t, "1", response.Result.Description)
+		require.Equal(t, "field", response.Result.Config.Field)
+		require.Equal(t, map[string]interface{}{"expr": "bar"}, response.Result.Config.Target)
 		require.NoError(t, res.Body.Close())
 
 		// partially updating only label
@@ -372,8 +374,8 @@ func TestIntegrationUpdateCorrelation(t *testing.T) {
 		require.Equal(t, "Correlation updated", response.Message)
 		require.Equal(t, "2", response.Result.Label)
 		require.Equal(t, "1", response.Result.Description)
-		// TODO: Test the config more in detail (e.g. require.Equal(t, `"fieldName", response.Result.Config.Field), etc.)
-		require.Equal(t, `{"field": "fieldName","target": { "expr": "bar" }}`, response.Result.Config)
+		require.Equal(t, "field", response.Result.Config.Field)
+		require.Equal(t, map[string]interface{}{"expr": "bar"}, response.Result.Config.Target)
 		require.NoError(t, res.Body.Close())
 
 		// partially updating only description
@@ -395,7 +397,8 @@ func TestIntegrationUpdateCorrelation(t *testing.T) {
 		require.Equal(t, "Correlation updated", response.Message)
 		require.Equal(t, "2", response.Result.Label)
 		require.Equal(t, "2", response.Result.Description)
-		require.Equal(t, `{"field": "fieldName","target": { "expr": "bar" }}`, response.Result.Config)
+		require.Equal(t, "field", response.Result.Config.Field)
+		require.Equal(t, map[string]interface{}{"expr": "bar"}, response.Result.Config.Target)
 		require.NoError(t, res.Body.Close())
 
 		// partially updating only config
@@ -404,10 +407,9 @@ func TestIntegrationUpdateCorrelation(t *testing.T) {
 			user: adminUser,
 			body: `{
 				"config": {
-					"field": "fieldName",
+					"field": "name",
 					"target": { "expr": "baz" }
-				}
-			}`,
+			}}`,
 		})
 		require.Equal(t, http.StatusOK, res.StatusCode)
 
@@ -420,7 +422,8 @@ func TestIntegrationUpdateCorrelation(t *testing.T) {
 		require.Equal(t, "Correlation updated", response.Message)
 		require.Equal(t, "2", response.Result.Label)
 		require.Equal(t, "2", response.Result.Description)
-		require.Equal(t, `{"field": "fieldName","target": { "expr": "baz" }}`, response.Result.Config)
+		require.Equal(t, "field", response.Result.Config.Field)
+		require.Equal(t, map[string]interface{}{"expr": "baz"}, response.Result.Config.Target)
 		require.NoError(t, res.Body.Close())
 
 		// setting label and description to empty strings (testing whether empty strings are handled correctly)
@@ -429,7 +432,11 @@ func TestIntegrationUpdateCorrelation(t *testing.T) {
 			user: adminUser,
 			body: `{
 				"label": "",
-				"description": ""
+				"description": "",
+				"config": {
+					"field": "",
+					"target": {}
+				}
 			}`,
 		})
 		require.Equal(t, http.StatusOK, res.StatusCode)
@@ -443,7 +450,8 @@ func TestIntegrationUpdateCorrelation(t *testing.T) {
 		require.Equal(t, "Correlation updated", response.Message)
 		require.Equal(t, "", response.Result.Label)
 		require.Equal(t, "", response.Result.Description)
-		require.Equal(t, `{"field": "fieldName","target": { "expr": "baz" }}`, response.Result.Config)
+		require.Equal(t, "", response.Result.Config.Field)
+		require.Equal(t, map[string]interface{}{}, response.Result.Config.Target)
 		require.NoError(t, res.Body.Close())
 	})
 }
